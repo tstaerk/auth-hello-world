@@ -1,0 +1,44 @@
+<html>
+  <!-- This page will show the name of the person logged in to your app via Google. It will only work on https pages. 
+       It uses a client ID, if you want to use it, use your own client id. 
+       To use it, create your own app with client ID on console.cloud.google.com, then enter the client ID below
+       (ending in apps.googleusercontent.com). -->
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-client_id" content="insert-your-client-id-here.apps.googleusercontent.com">
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+  <script language="javascript">
+	  function reqListener () {
+  console.log(this.responseText);
+}
+
+    function onSignIn(googleUser) 
+    { // This will be called when you open the site, refresh or login.
+      console.log("entering onSignIn");
+      var profile = googleUser.getBasicProfile();
+      console.log('Name: ' + profile.getName());
+      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+      document.getElementById("demo").innerHTML="A user is logged in named "+profile.getName();
+    }
+  </script>
+
+  <a href="#" onclick="signOut();">Sign out</a>
+  <script>
+    function signOut() 
+    {
+      var auth2 = gapi.auth2.getAuthInstance();
+      var profile=auth2.currentUser.get().getBasicProfile();
+      console.log('Full Name2: ' + profile.getName());
+      auth2.signOut().then(function () 
+      {
+        console.log('User signed out.');
+	document.getElementById("demo").innerHTML="User logged out";
+      });
+    }
+  </script>
+  <body>
+    <p id="demo">
+      If you see this, something has gone wrong. Javascript could not be executed.
+    </p>
+  </body>
+</html>
