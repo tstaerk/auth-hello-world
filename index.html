@@ -8,16 +8,11 @@
   <div class="g-signin2" data-onsuccess="onSignIn"></div>
 
   <script language="javascript">
-	  function reqListener () {
-  console.log(this.responseText);
-}
 
     function onSignIn(googleUser) 
     { // This will be called when you open the site, refresh or login.
       console.log("entering onSignIn");
       var profile = googleUser.getBasicProfile();
-      console.log('Name: ' + profile.getName());
-      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
       document.getElementById("demo").innerHTML="A user is logged in named "+profile.getName();
     }
   </script>
@@ -27,8 +22,6 @@
     function signOut() 
     {
       var auth2 = gapi.auth2.getAuthInstance();
-      var profile=auth2.currentUser.get().getBasicProfile();
-      console.log('Full Name2: ' + profile.getName());
       auth2.signOut().then(function () 
       {
         console.log('User signed out.');
@@ -38,7 +31,7 @@
   </script>
   <body>
     <p id="demo">
-      If you see this, something has gone wrong. Javascript could not be executed.
+      If you see this, no one is logged in or javascript is disabled or you used http instead of https.
     </p>
   </body>
 </html>
