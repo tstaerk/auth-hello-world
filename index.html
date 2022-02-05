@@ -1,8 +1,10 @@
 <html>
-  <!-- This page will show the name of the person logged in to your app via Google. It will only work on https pages. To use it, create your own app with client ID on console.cloud.google.com, then enter the client ID below (ending in apps.googleusercontent.com). -->
+  <!-- This page will show the name of the person logged in to your app via Google. It will only work on https pages. 
+  It will also allow users to allow this app to access their calendar and then display a list of calendars.
+  To use it, create your own app with client ID on console.cloud.google.com, then replace 12345 below with your
+  client ID and BLABLA with your client secret. -->
   <script src="https://apis.google.com/js/platform.js" async defer></script>
-  <meta name="google-signin-client_id" content="insert-your-client-id-here.apps.googleusercontent.com">
-  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <meta name="google-signin-client_id" content="12345.apps.googleusercontent.com">
 
   <script language="javascript">
 
@@ -10,25 +12,63 @@
     { // This will be called when you open the site, refresh or login.
       console.log("entering onSignIn");
       var profile = googleUser.getBasicProfile();
-      document.getElementById("demo").innerHTML="A user is logged in named "+profile.getName();
+      document.getElementById("demo").innerHTML+="A user is logged in named "+profile.getName()+"<br />";
     }
-  </script>
-
-  <a href="#" onclick="signOut();">Sign out</a>
-  <script>
+    
     function signOut() 
     {
       var auth2 = gapi.auth2.getAuthInstance();
       auth2.signOut().then(function () 
       {
         console.log('User signed out.');
-	document.getElementById("demo").innerHTML="User logged out";
+	      document.getElementById("demo").innerHTML+="User logged out";
       });
     }
+       
   </script>
+  
   <body>
+
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <a href="#" onclick="signOut();">Sign out</a>
+  
+    <a href="https://accounts.google.com/o/oauth2/auth?response_type=code&redirect_uri=https://www.linuxintro.org/test&scope=https://www.googleapis.com/auth/calendar&client_id=12345.apps.googleusercontent.com&access_type=offline&prompt=consent">Ask Google to allow this app access to your calendar</a>
     <p id="demo">
-      If you see this, no one is logged in or javascript is disabled or you used http instead of https.
+      Here we may paste some log messages:<br />
     </p>
+    
+    <script language="javascript">
+      // this script accesses the Element with the ID demo, so it has to be placed after its definition.
+    
+      // let's see if we have a code passed to us in the URL
+      var items = location.search.substr(1).split("code=");
+      var code=items[1];
+      document.getElementById("demo").innerHTML+="We received an authorization code "+code+"<br />";
+    
+      // if code exits, request access token
+      if (code!=null)
+      {
+        console.log("received code");
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://www.googleapis.com/oauth2/v3/token", true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send("grant_type=authorization_code&code="+code+"&client_id=12345.apps.googleusercontent.com&client_secret=BLABLA&redirect_uri=https://www.linuxintro.org/test");
+        xhr.onload = function() 
+        {
+          data = JSON.parse(this.responseText);
+          document.getElementById("demo").innerHTML+="Access token is "+data.access_token+"<br />";
+          var calendarrequest = new XMLHttpRequest();
+          calendarrequest.open("GET", "https://www.googleapis.com/calendar/v3/users/me/calendarList");
+          calendarrequest.setRequestHeader("Authorization", "Bearer "+data.access_token);
+          calendarrequest.send();
+          calendarrequest.onload = function() 
+          {
+            document.getElementById("demo").innerHTML+="Here are your calendars: "+this.responseText+"<br />";
+          };
+        };
+      }
+      else {console.log("code is empty");}
+    </script>  
+    
   </body>
 </html>
